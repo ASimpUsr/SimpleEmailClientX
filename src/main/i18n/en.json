@@ -1,0 +1,74 @@
+{
+  "appName": "Simple Email Client X",
+  "menu": {
+    "inbox": "Inbox",
+    "send": "Compose",
+    "accounts": "Accounts",
+    "settings": "Settings",
+    "about": "About"
+  },
+  "settings": {
+    "title": "Settings",
+    "general": "General",
+    "security": "Security",
+    "language": "Interface Language",
+    "languageSystem": "Follow System",
+    "autoRefresh": "Auto refresh inbox",
+    "refreshInterval": "Refresh interval (seconds)",
+    "mailtoRegister": "Register MailTo protocol",
+    "mailtoRegisterDesc": "Registering makes mailto links open this app automatically",
+    "allowDevTools": "Allow DevTools in mail preview",
+    "cancel": "Cancel",
+    "apply": "Apply",
+    "ok": "OK"
+  },
+  "security": {
+    "encryptCredentials": "Encrypt stored credentials",
+    "encryptCredentialsDesc": "Encrypt passwords and tokens with system keyring",
+    "microsoftSSL": "Use SSL for Microsoft login",
+    "microsoftSSLDesc": "May cause login failure on some networks",
+    "allowMailJS": "Allow JavaScript in mail preview",
+    "allowMailJSDesc": "Disabling reduces malicious mail risk"
+  },
+  "account": {
+    "add": "Add Account",
+    "microsoftLogin": "Sign in with Microsoft",
+    "customConfig": "Custom SMTP/IMAP",
+    "email": "Email address",
+    "password": "Password / Auth code",
+    "imapServer": "IMAP server",
+    "imapPort": "IMAP port",
+    "smtpServer": "SMTP server",
+    "smtpPort": "SMTP port"
+  },
+  "common": {
+    "save": "Save",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "close": "Close",
+    "loading": "Loading...",
+    "noSender": "(No sender)",
+    "noSubject": "(No subject)",
+    "noMessages": "No more emails",
+    "loadFailed": "Load failed: {{msg}}"
+  },
+  "mail": {
+    "inbox": "Inbox",
+    "sent": "Sent",
+    "junk": "Junk",
+    "trash": "Trash",
+    "refresh": "Refresh",
+    "send": "Send",
+    "to": "To",
+    "subject": "Subject",
+    "content": "Content",
+    "loadMore": "Load more"
+    ,"attachments": "Attachments"
+  },
+  "about": {
+    "title": "About",
+    "version": "Version",
+    "license": "License",
+    "author": "Author"
+  }
+}

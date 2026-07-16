@@ -1,0 +1,74 @@
+{
+  "appName": "Simple Email Client X",
+  "menu": {
+    "inbox": "收件箱",
+    "send": "发送邮件",
+    "accounts": "账户管理",
+    "settings": "设置",
+    "about": "关于"
+  },
+  "settings": {
+    "title": "设置",
+    "general": "常规",
+    "security": "安全",
+    "language": "界面语言",
+    "languageSystem": "跟随系统",
+    "autoRefresh": "自动刷新收件箱",
+    "refreshInterval": "刷新间隔（秒）",
+    "mailtoRegister": "注册 MailTo 协议",
+    "mailtoRegisterDesc": "注册后点击网页 mailto 链接将自动打开本程序",
+    "allowDevTools": "允许邮件预览打开 DevTools",
+    "cancel": "取消",
+    "apply": "应用",
+    "ok": "确定"
+  },
+  "security": {
+    "encryptCredentials": "加密存储登录凭据",
+    "encryptCredentialsDesc": "使用系统密钥加密密码和 Token",
+    "microsoftSSL": "Microsoft 登录时使用 SSL 加密",
+    "microsoftSSLDesc": "可能导致部分网络环境登录失败",
+    "allowMailJS": "允许邮件预览使用 JavaScript",
+    "allowMailJSDesc": "关闭可降低恶意邮件风险"
+  },
+  "account": {
+    "add": "添加账户",
+    "microsoftLogin": "使用 Microsoft 登录",
+    "customConfig": "自定义 SMTP/IMAP",
+    "email": "邮箱地址",
+    "password": "密码/授权码",
+    "imapServer": "IMAP 服务器",
+    "imapPort": "IMAP 端口",
+    "smtpServer": "SMTP 服务器",
+    "smtpPort": "SMTP 端口"
+  },
+  "common": {
+    "save": "保存",
+    "delete": "删除",
+    "cancel": "取消",
+    "close": "关闭",
+    "loading": "加载中...",
+    "noSender": "(无发件人)",
+    "noSubject": "(无主题)",
+    "noMessages": "没有更多邮件",
+    "loadFailed": "加载失败：{{msg}}"
+  },
+  "mail": {
+    "inbox": "收件箱",
+    "sent": "已发送",
+    "junk": "垃圾邮件",
+    "trash": "已删除",
+    "refresh": "刷新",
+    "send": "发送",
+    "to": "收件人",
+    "subject": "主题",
+    "content": "内容",
+    "loadMore": "加载更多"
+    ,"attachments": "附件"
+  },
+  "about": {
+    "title": "关于",
+    "version": "版本",
+    "license": "许可证",
+    "author": "作者"
+  }
+}

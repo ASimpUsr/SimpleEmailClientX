@@ -1,0 +1,82 @@
+/* src/renderer/css/settings.css */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; }
+
+.settings-container {
+  display: flex;
+  height: 100vh;
+}
+.settings-sidebar {
+  width: 140px;
+  background: #f5f5f5;
+  border-right: 1px solid #e0e0e0;
+  padding: 16px 0;
+}
+.setting-tab {
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+.setting-tab.active {
+  background: #e0e8f5;
+  color: #0078d4;
+  font-weight: 600;
+}
+
+.settings-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+.tab-panel h2 {
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+.tab-panel.hidden { display: none; }
+
+.setting-item {
+  margin-bottom: 20px;
+}
+.setting-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+.setting-actions button {
+  padding: 8px 14px;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.setting-actions button.primary-btn {
+  background: #0078d4;
+  color: #fff;
+  border-color: transparent;
+}
+.setting-actions button:hover {
+  background: #f0f0f0;
+}
+.setting-item label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.setting-item input[type="number"],
+.setting-item select {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-width: 120px;
+}
+.desc {
+  margin-top: 4px;
+  margin-left: 24px;
+  font-size: 12px;
+  color: #888;
+}

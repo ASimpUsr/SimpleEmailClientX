@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>设置 - Simple Email Client X</title>
+  <link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+  <div class="settings-container">
+    <div class="settings-sidebar">
+      <button class="setting-tab active" data-tab="general" data-i18n="settings.general">常规</button>
+      <button class="setting-tab" data-tab="security" data-i18n="settings.security">安全</button>
+    </div>
+    
+    <div class="settings-content">
+      <!-- 常规设置 -->
+      <div id="tabGeneral" class="tab-panel">
+        <h2 data-i18n="settings.general">常规</h2>
+        
+        <div class="setting-item">
+          <label data-i18n="settings.language">界面语言</label>
+          <select id="settingLanguage">
+            <option value="system" data-i18n="settings.languageSystem">跟随系统</option>
+            <option value="zh-CN">简体中文</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" id="settingAutoRefresh">
+            <span data-i18n="settings.autoRefresh">自动刷新收件箱</span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <label data-i18n="settings.refreshInterval">刷新间隔（秒）</label>
+          <input type="number" id="settingRefreshInterval" min="60" max="3600">
+        </div>
+
+        <div class="setting-item">
+          <label data-i18n="settings.mailPageSize">邮件单页显示数量</label>
+          <input type="number" id="settingMailPageSize" min="10" max="200">
+        </div>
+
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" id="settingMailto">
+            <span data-i18n="settings.mailtoRegister">注册 MailTo 协议</span>
+          </label>
+          <p class="desc" data-i18n="settings.mailtoRegisterDesc">注册后点击网页 mailto 链接将自动打开本程序</p>
+        </div>
+
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" id="settingDevTools">
+            <span data-i18n="settings.allowDevTools">允许邮件预览打开 DevTools</span>
+          </label>
+        </div>
+        <div class="setting-actions">
+          <button id="btnCancel" data-i18n="settings.cancel">取消</button>
+          <button id="btnApply" data-i18n="settings.apply">应用</button>
+          <button id="btnOk" class="primary-btn" data-i18n="settings.ok">确定</button>
+        </div>
+      </div>
+
+      <!-- 安全设置 -->
+      <div id="tabSecurity" class="tab-panel hidden">
+        <h2 data-i18n="settings.security">安全</h2>
+
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" id="settingEncryptCred">
+            <span data-i18n="security.encryptCredentials">加密存储登录凭据</span>
+          </label>
+          <p class="desc" data-i18n="security.encryptCredentialsDesc">使用系统密钥加密密码和 Token，仅当前用户可解密</p>
+        </div>
+
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" id="settingMicrosoftSSL">
+            <span data-i18n="security.microsoftSSL">Microsoft 登录时使用 SSL 加密</span>
+          </label>
+          <p class="desc" data-i18n="security.microsoftSSLDesc">可能导致部分网络环境登录失败</p>
+        </div>
+
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" id="settingMailJS">
+            <span data-i18n="security.allowMailJS">允许邮件预览使用 JavaScript</span>
+          </label>
+          <p class="desc" data-i18n="security.allowMailJSDesc">关闭可降低恶意邮件追踪和攻击风险</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/settings.js"></script>
+</body>
+</html>

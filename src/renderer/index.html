@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Email Client X</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- 左侧边栏 -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2 id="appTitle">Simple Email Client X</h2>
+      </div>
+      
+      <div class="account-section">
+        <div class="section-header">
+          <span data-i18n="menu.accounts">账户</span>
+          <button id="btnAddAccount" class="icon-btn" title="添加账户" data-i18n-title="account.add">+</button>
+        </div>
+        <ul id="accountList" class="account-list"></ul>
+      </div>
+
+      <div class="folder-section">
+        <div class="section-header">
+          <span data-i18n="mail.inbox">文件夹</span>
+        </div>
+        <ul id="folderTree" class="folder-tree"></ul>
+      </div>
+
+      <div class="sidebar-footer">
+        <button id="btnSettings" data-i18n="menu.settings">设置</button>
+        <button id="btnAbout" data-i18n="menu.about">关于</button>
+      </div>
+    </aside>
+
+    <!-- 中间邮件列表 -->
+    <section class="mail-list-panel">
+      <div class="panel-toolbar">
+        <button id="btnRefresh" data-i18n="mail.refresh">刷新</button>
+        <button id="btnCompose" data-i18n="menu.send">写邮件</button>
+        <div class="spacer"></div>
+        <span id="currentFolderName"></span>
+      </div>
+      <div id="mailList" class="mail-list"></div>
+      <div class="pagination-bar" id="paginationBar" style="display:none;">
+        <button id="btnPrevPage" class="pagination-btn" type="button">&lt;</button>
+        <div id="paginationNumbers" class="pagination-numbers"></div>
+        <button id="btnNextPage" class="pagination-btn" type="button">&gt;</button>
+      </div>
+    </section>
+
+    <!-- 右侧邮件预览 -->
+    <section class="mail-preview-panel">
+      <div class="panel-toolbar">
+        <span id="mailSubject"></span>
+        <div class="spacer"></div>
+        <button id="btnDelete" class="danger-btn" data-i18n="common.delete">删除</button>
+      </div>
+      <div class="mail-meta">
+        <div><strong>发件人：</strong><span id="mailFrom"></span></div>
+        <div><strong>时间：</strong><span id="mailDate"></span></div>
+      </div>
+      <div id="mailContent" class="mail-content"></div>
+    </section>
+  </div>
+
+  <!-- 添加账户弹窗 -->
+  <div id="accountModal" class="modal hidden">
+    <div class="modal-content">
+      <h3 data-i18n="account.add">添加账户</h3>
+      <div class="account-tabs">
+        <button class="tab-btn active" data-tab="microsoft" data-i18n="account.microsoftLogin">使用 Microsoft 登录</button>
+        <button class="tab-btn" data-tab="custom" data-i18n="account.customConfig">自定义 SMTP/IMAP</button>
+      </div>
+      
+      <div id="tabMicrosoft" class="tab-content">
+        <button id="btnMicrosoftLogin" class="primary-btn full-width" data-i18n="account.microsoftLogin">使用 Microsoft 登录</button>
+        <p class="hint">支持 Outlook、Hotmail、Office 365 账户</p>
+      </div>
+
+      <div id="tabCustom" class="tab-content hidden">
+        <div class="form-group">
+          <label data-i18n="account.email">邮箱地址</label>
+          <input type="email" id="inputEmail">
+        </div>
+        <div class="form-group">
+          <label data-i18n="account.password">密码 / 授权码</label>
+          <input type="password" id="inputPassword">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label data-i18n="account.imapServer">IMAP 服务器</label>
+            <input type="text" id="inputImapServer">
+          </div>
+          <div class="form-group">
+            <label data-i18n="account.imapPort">端口</label>
+            <input type="number" id="inputImapPort" value="993">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label data-i18n="account.smtpServer">SMTP 服务器</label>
+            <input type="text" id="inputSmtpServer">
+          </div>
+          <div class="form-group">
+            <label data-i18n="account.smtpPort">端口</label>
+            <input type="number" id="inputSmtpPort" value="465">
+          </div>
+        </div>
+        <button id="btnSaveCustom" class="primary-btn full-width" data-i18n="common.save">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 写邮件弹窗 -->
+  <div id="composeModal" class="modal hidden">
+    <div class="modal-content large">
+      <h3 data-i18n="menu.send">发送邮件</h3>
+      <div class="form-group">
+        <label data-i18n="mail.to">收件人</label>
+        <input type="text" id="composeTo">
+      </div>
+      <div class="form-group">
+        <label data-i18n="mail.subject">主题</label>
+        <input type="text" id="composeSubject">
+      </div>
+      <div class="form-group">
+        <label data-i18n="mail.content">内容</label>
+        <textarea id="composeBody" rows="12"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button id="btnCancelSend" data-i18n="common.cancel">取消</button>
+        <button id="btnSendMail" class="primary-btn" data-i18n="mail.send">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 关于弹窗 -->
+  <div id="aboutModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Simple Email Client X</h3>
+      <p>版本：<span id="aboutVersion"></span></p>
+      <p>许可证：GPL-3.0</p>
+      <p>作者：ASimpUsr</p>
+      <p>基于 Electron 构建</p>
+      <button id="btnCloseAbout" data-i18n="common.close">关闭</button>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

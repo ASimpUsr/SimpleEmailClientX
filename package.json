@@ -1,24 +1,65 @@
 {
   "name": "simple-email-client-x",
   "version": "1.0.0",
-  "description": "A simple email client.",
-  "homepage": "https://github.com/ASimpUsr/SimpleEmailClientX#readme",
-  "bugs": {
-    "url": "https://github.com/ASimpUsr/SimpleEmailClientX/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ASimpUsr/SimpleEmailClientX.git"
-  },
-  "license": "GPL-3.0-or-later",
+  "description": "A lightweight cross-platform email client built with Electron",
+  "main": "src/main/main.js",
   "author": "ASimpUsr",
-  "type": "commonjs",
-  "main": "index.js",
-"scripts": {
-  "start": "electron .",
-  "test": "echo \"Error: no test specified\" && exit 1"
-},
+  "license": "GPL-3.0",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:portable": "electron-builder --win portable",
+    "build:setup": "electron-builder --win nsis"
+  },
+  "dependencies": {
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "electron-store": "^8.2.0",
+    "i18next": "^23.11.5",
+    "imapflow": "^1.0.163",
+    "mailparser": "^3.7.1",
+    "nodemailer": "^6.9.14"
+  },
   "devDependencies": {
-    "electron": "^43.1.1"
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.asimpusr.simpleemailclientx",
+    "productName": "Simple Email Client X",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "assets/icon.ico",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Simple Email Client X"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.exe"
+    },
+    "protocols": [
+      {
+        "name": "MailTo",
+        "schemes": ["mailto"],
+        "role": "Editor"
+      }
+    ],
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "asar": true
   }
 }

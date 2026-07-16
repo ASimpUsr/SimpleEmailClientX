@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>新邮件 - Simple Email Client X</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; padding: 20px; }
+    h2 { margin-bottom: 16px; font-size: 16px; }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; margin-bottom: 4px; font-size: 13px; color: #555; }
+    input, textarea {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    textarea { resize: vertical; min-height: 160px; }
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    button {
+      padding: 6px 16px;
+      border: 1px solid #ccc;
+      background: #fff;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .primary { background: #0078d4; color: #fff; border-color: #0078d4; }
+    .account-select { margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <h2>新邮件</h2>
+  
+  <div class="account-select">
+    <label>发件账户</label>
+    <select id="fromAccount"></select>
+  </div>
+
+  <div class="form-group">
+    <label>收件人</label>
+    <input type="text" id="mailtoTo">
+  </div>
+  <div class="form-group">
+    <label>主题</label>
+    <input type="text" id="mailtoSubject">
+  </div>
+  <div class="form-group">
+    <label>内容</label>
+    <textarea id="mailtoBody"></textarea>
+  </div>
+
+  <div class="actions">
+    <button id="btnCancel">取消</button>
+    <button id="btnSend" class="primary">发送</button>
+  </div>
+
+  <script>
+    let accounts = [];
+
+    async function init() {
+      accounts = await window.secxAPI.mail.listAccounts();
+      const select = document.getElementById('fromAccount');
+      accounts.forEach(acc => {
+        const opt = document.createElement('option');
+        opt.value = acc.id;
+        opt.textContent = acc.email;
+        select.appendChild(opt);
+      });
+    }
+
+    window.secxAPI.onMailtoData((url) => {
+      // 解析 mailto 协议
+      const parsed = parseMailto(url);
+      document.getElementById('mailtoTo').value = parsed.to || '';
+      document.getElementById('mailtoSubject').value = parsed.subject || '';
+      document.getElementById('mailtoBody').value = parsed.body || '';
+    });
+
+    function parseMailto(url) {
+      const result = { to: '', subject: '', body: '' };
+      const clean = url.replace(/^mailto:/, '');
+      const [toPart, queryPart] = clean.split('?');
+      result.to = decodeURIComponent(toPart);
+      
+      if (queryPart) {
+        const params = new URLSearchParams(queryPart);
+        result.subject = params.get('subject') || '';
+        result.body = params.get('body') || '';
+      }
+      return result;
+    }
+
+    document.getElementById('btnCancel').addEventListener('click', () => window.close());
+    document.getElementById('btnSend').addEventListener('click', async () => {
+      const accountId = document.getElementById('fromAccount').value;
+      if (!accountId) { alert('请选择发件账户'); return; }
+      
+      const mail = {
+        to: document.getElementById('mailtoTo').value,
+        subject: document.getElementById('mailtoSubject').value,
+        body: document.getElementById('mailtoBody').value
+      };
+      
+      try {
+        await window.secxAPI.mail.sendMail(accountId, mail);
+        alert('发送成功');
+        window.close();
+      } catch (e) {
+        alert('发送失败：' + e.message);
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
