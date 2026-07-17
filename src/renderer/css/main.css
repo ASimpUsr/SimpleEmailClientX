@@ -69,6 +69,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; f
   background: #fff;
   cursor: pointer;
   border-radius: 4px;
+  color: #333;
 }
 .sidebar-footer button:hover { background: #f0f0f0; }
 
@@ -92,6 +93,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; f
   background: #fff;
   cursor: pointer;
   border-radius: 4px;
+  color: #333;
 }
 .panel-toolbar button:hover { background: #f0f0f0; }
 .spacer { flex: 1; }

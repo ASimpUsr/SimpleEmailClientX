@@ -287,5 +287,6 @@ module.exports = {
   listMessages,
   getMessage,
   sendMail,
-  deleteMessage
+  deleteMessage,
+  moveMessage
 };

@@ -46,7 +46,7 @@
           ]
         }
       ],
-      "icon": "assets/icon.ico",
+      
       "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "nsis": {
