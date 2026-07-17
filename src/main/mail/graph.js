@@ -176,18 +176,71 @@ async function listMessages(account, folderId, page = 1, pageSize = 30) {
   }));
 }
 
-async function getMessage(account, messageId) {
+async function getMessage(account, messageId, folderId) {
   const client = createClient(account);
-  const m = await client.api(`/me/messages/${messageId}`).get();
-  
-  return {
-    uid: m.id,
-    subject: m.subject,
-    from: m.from?.emailAddress?.address || '',
-    date: new Date(m.receivedDateTime).toLocaleString(),
-    html: m.body.contentType === 'html' ? m.body.content : '',
-    text: m.body.contentType === 'text' ? m.body.content : ''
+  const rawId = messageId || '';
+  const candidates = [];
+  if (rawId) {
+    candidates.push(rawId);
+    const trimmed = rawId.replace(/^['"]|['"]$/g, '').trim();
+    if (trimmed && trimmed !== rawId) candidates.push(trimmed);
+    const encoded = encodeURIComponent(trimmed);
+    if (encoded && encoded !== rawId) candidates.push(encoded);
+  }
+
+  const tryFetch = async (path) => {
+    const m = await client.api(path).get();
+    return {
+      uid: m.id,
+      subject: m.subject,
+      from: m.from?.emailAddress?.address || '',
+      date: new Date(m.receivedDateTime).toLocaleString(),
+      html: m.body?.contentType === 'html' ? m.body.content : '',
+      text: m.body?.contentType === 'text' ? m.body.content : ''
+    };
   };
+
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    try {
+      return await tryFetch(`/me/messages/${candidate}`);
+    } catch (err) {
+      if (!/malformed|invalid|not found|notfound/i.test(err?.message || '')) throw err;
+    }
+
+    if (folderId) {
+      try {
+        return await tryFetch(`/me/mailFolders/${folderId}/messages/${candidate}`);
+      } catch (err) {
+        if (!/malformed|invalid|not found|notfound/i.test(err?.message || '')) throw err;
+      }
+    }
+  }
+
+  if (rawId) {
+    try {
+      const result = await client
+        .api('/me/messages')
+        .select('id,subject,from,receivedDateTime,body')
+        .top(5)
+        .get();
+      const first = result.value?.find(item => item.id === rawId || item.id === encodeURIComponent(rawId));
+      if (first) {
+        return {
+          uid: first.id,
+          subject: first.subject,
+          from: first.from?.emailAddress?.address || '',
+          date: new Date(first.receivedDateTime).toLocaleString(),
+          html: first.body?.contentType === 'html' ? first.body.content : '',
+          text: first.body?.contentType === 'text' ? first.body.content : ''
+        };
+      }
+    } catch (err) {
+      console.warn('Graph fallback lookup failed', err);
+    }
+  }
+
+  throw new Error('无法获取邮件详情');
 }
 
 async function sendMail(account, mail) {
@@ -213,6 +266,19 @@ async function deleteMessage(account, messageId) {
   const client = createClient(account);
   await client.api(`/me/messages/${messageId}`).delete();
   return true;
+}
+
+async function moveMessage(account, messageId, destinationFolderId) {
+  const client = createClient(account);
+  // Graph move API: POST /me/messages/{id}/move with { destinationId }
+  const res = await client.api(`/me/messages/${messageId}/move`).post({ destinationId: destinationFolderId });
+  // 返回移动后的基本信息
+  return {
+    uid: res.id,
+    subject: res.subject,
+    from: res.from?.emailAddress?.address || '',
+    date: new Date(res.receivedDateTime).toLocaleString()
+  };
 }
 
 module.exports = {

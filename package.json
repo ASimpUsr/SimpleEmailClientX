@@ -22,7 +22,8 @@
   },
   "devDependencies": {
     "electron": "^31.0.0",
-    "electron-builder": "^24.13.3"
+    "electron-builder": "^24.13.3",
+    "jimp": "^1.6.1"
   },
   "build": {
     "appId": "com.asimpusr.simpleemailclientx",
@@ -32,8 +33,18 @@
     },
     "win": {
       "target": [
-        { "target": "nsis", "arch": ["x64"] },
-        { "target": "portable", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "icon": "assets/icon.ico",
       "artifactName": "${productName}-${version}-${arch}.${ext}"
@@ -51,7 +62,9 @@
     "protocols": [
       {
         "name": "MailTo",
-        "schemes": ["mailto"],
+        "schemes": [
+          "mailto"
+        ],
         "role": "Editor"
       }
     ],

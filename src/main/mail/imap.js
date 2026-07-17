@@ -11,7 +11,7 @@ function isNeteaseEmail(email) {
 }
 
 function createImapClient(account) {
-  const lock = await client.getMailboxLock(folder);
+  const config = getConfig();
   const password = config.security.encryptCredentials ? decrypt(account.password) : account.password;
   
   const options = {

@@ -8,6 +8,7 @@ const { registerMailHandlers } = require('./mail/handlers');
 let mainWindow = null;
 let mailtoWindow = null;
 let settingsWindow = null;
+let previewWindow = null;
 let refreshTimer = null;
 
 function startAutoRefresh() {
@@ -167,12 +168,53 @@ function openSettingsWindow() {
   settingsWindow.on('closed', () => { settingsWindow = null; });
 }
 
+function openPreviewWindow(message) {
+  if (!message) return;
+
+  if (previewWindow && !previewWindow.isDestroyed()) {
+    previewWindow.focus();
+    previewWindow.webContents.send('mail:preview-data', message);
+    return;
+  }
+
+  previewWindow = new BrowserWindow({
+    width: 900,
+    height: 700,
+    minWidth: 700,
+    minHeight: 520,
+    parent: mainWindow,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  });
+
+  previewWindow.setMenuBarVisibility(false);
+  previewWindow.loadFile(path.join(__dirname, '../renderer/preview.html'));
+
+  previewWindow.once('ready-to-show', () => {
+    previewWindow.show();
+  });
+
+  previewWindow.webContents.on('did-finish-load', () => {
+    if (!previewWindow.isDestroyed()) {
+      previewWindow.webContents.send('mail:preview-data', message);
+    }
+  });
+
+  previewWindow.on('closed', () => {
+    previewWindow = null;
+  });
+}
+
 // === IPC 注册 ===
 ipcMain.handle('config:get', () => getConfig());
 ipcMain.handle('i18n:t', (_, key) => t(key));
 ipcMain.handle('security:encrypt', (_, data) => encrypt(data));
 ipcMain.handle('security:decrypt', (_, data) => decrypt(data));
 ipcMain.handle('window:openSettings', () => openSettingsWindow());
+ipcMain.handle('window:openPreview', (_, message) => openPreviewWindow(message));
 ipcMain.handle('app:getVersion', () => app.getVersion());
 
 // 注册 mailto 协议

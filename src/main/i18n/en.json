@@ -49,8 +49,7 @@
     "loading": "Loading...",
     "noSender": "(No sender)",
     "noSubject": "(No subject)",
-    "noMessages": "No more emails",
-    "loadFailed": "Load failed: {{msg}}"
+    "noMessages": "No more emails"
   },
   "mail": {
     "inbox": "Inbox",
@@ -62,8 +61,8 @@
     "to": "To",
     "subject": "Subject",
     "content": "Content",
-    "loadMore": "Load more"
-    ,"attachments": "Attachments"
+    "loadMore": "Load more",
+    "move": "Move"
   },
   "about": {
     "title": "About",

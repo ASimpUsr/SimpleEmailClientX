@@ -115,7 +115,7 @@ function registerMailHandlers() {
         acc.accessToken = decrypt(account.accessToken);
         acc.refreshToken = decrypt(account.refreshToken);
       }
-      return await graph.getMessage(acc, uid);
+      return await graph.getMessage(acc, uid, folder);
     } else {
       return await imap.getMessage(account, uid, folder || 'INBOX');
     }
@@ -163,7 +163,14 @@ function registerMailHandlers() {
     if (account.type === 'imap') {
       return await imap.moveMessage(account, uid, destination);
     }
-    // Graph 暂未实现移动
+    if (account.type === 'graph') {
+      const acc = { ...account };
+      if (getConfig().security.encryptCredentials) {
+        acc.accessToken = decrypt(account.accessToken);
+        acc.refreshToken = decrypt(account.refreshToken);
+      }
+      return await graph.moveMessage(acc, uid, destination);
+    }
     throw new Error('当前账户类型不支持移动邮件');
   });
 }

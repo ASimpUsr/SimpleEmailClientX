@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>邮件预览</title>
+  <style>
+    body { margin: 0; padding: 16px; font-family: sans-serif; line-height: 1.6; background: #f7f8fb; }
+    .preview-header { margin-bottom: 16px; }
+    .preview-header h1 { margin: 0 0 8px; font-size: 1.4rem; }
+    .meta { color: #555; font-size: 0.95rem; margin-bottom: 24px; }
+    .meta div { margin-bottom: 4px; }
+    .preview-body { background: #fff; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+    .preview-body iframe { width: 100%; height: calc(100vh - 180px); border: none; }
+    .fallback { padding: 16px; color: #333; }
+  </style>
+</head>
+<body>
+  <div class="preview-header">
+    <h1 id="previewSubject">邮件预览</h1>
+    <div class="meta">
+      <div><strong>发件人：</strong><span id="previewFrom"></span></div>
+      <div><strong>时间：</strong><span id="previewDate"></span></div>
+    </div>
+  </div>
+  <div class="preview-body" id="previewBody"></div>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const bodyEl = document.getElementById('previewBody');
+      const previewSubject = document.getElementById('previewSubject');
+      const previewFrom = document.getElementById('previewFrom');
+      const previewDate = document.getElementById('previewDate');
+
+      window.secxAPI.onMailPreviewData(message => {
+        if (!message) {
+          bodyEl.innerHTML = '<div class="fallback">无法加载邮件内容</div>';
+          return;
+        }
+
+        previewSubject.textContent = message.subject || '无主题';
+        previewFrom.textContent = message.from || '未知';
+        previewDate.textContent = message.date || '';
+
+        const content = message.html || message.text || '<p>无内容</p>';
+        const iframe = document.createElement('iframe');
+        iframe.sandbox = 'allow-same-origin';
+        iframe.srcdoc = content;
+        bodyEl.innerHTML = '';
+        bodyEl.appendChild(iframe);
+      });
+    });
+  </script>
+</body>
+</html>

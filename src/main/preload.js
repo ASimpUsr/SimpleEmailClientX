@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('secxAPI', {
 
   // 窗口
   openSettings: () => ipcRenderer.invoke('window:openSettings'),
+  openPreview: (message) => ipcRenderer.invoke('window:openPreview', message),
   getAppVersion: () => ipcRenderer.invoke('app:getVersion'),
 
   // MailTo
@@ -22,6 +23,7 @@ contextBridge.exposeInMainWorld('secxAPI', {
   isMailtoRegistered: () => ipcRenderer.invoke('mailto:isRegistered'),
   onMailtoData: (callback) => ipcRenderer.on('mailto-data', (_, url) => callback(url)),
   onI18nChanged: (callback) => ipcRenderer.on('i18n:changed', callback),
+  onMailPreviewData: (callback) => ipcRenderer.on('mail:preview-data', (_, message) => callback(message)),
 
   // 邮件操作
   mail: {
@@ -30,9 +32,9 @@ contextBridge.exposeInMainWorld('secxAPI', {
     removeAccount: (id) => ipcRenderer.invoke('mail:removeAccount', id),
     listFolders: (accId) => ipcRenderer.invoke('mail:listFolders', accId),
     listMessages: (accId, folder, page, pageSize) => ipcRenderer.invoke('mail:listMessages', accId, folder, page, pageSize),
-    getMessage: (accId, folder, uid) => ipcRenderer.invoke('mail:getMessage', accId, uid, folder),
+    getMessage: (accId, uid, folder) => ipcRenderer.invoke('mail:getMessage', accId, uid, folder),
     sendMail: (accId, mail) => ipcRenderer.invoke('mail:sendMail', accId, mail),
-    deleteMessage: (accId, folder, uid) => ipcRenderer.invoke('mail:deleteMessage', accId, uid, folder),
+    deleteMessage: (accId, uid) => ipcRenderer.invoke('mail:deleteMessage', accId, uid),
     moveMessage: (accId, uid, dest) => ipcRenderer.invoke('mail:moveMessage', accId, uid, dest),
 
     // Microsoft 登录

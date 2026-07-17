@@ -49,8 +49,7 @@
     "loading": "加载中...",
     "noSender": "(无发件人)",
     "noSubject": "(无主题)",
-    "noMessages": "没有更多邮件",
-    "loadFailed": "加载失败：{{msg}}"
+    "noMessages": "没有更多邮件"
   },
   "mail": {
     "inbox": "收件箱",
@@ -62,8 +61,8 @@
     "to": "收件人",
     "subject": "主题",
     "content": "内容",
-    "loadMore": "加载更多"
-    ,"attachments": "附件"
+    "loadMore": "加载更多",
+    "move": "移动"
   },
   "about": {
     "title": "关于",

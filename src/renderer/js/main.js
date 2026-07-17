@@ -7,6 +7,8 @@ let currentPageSize = 50;
 let pageCache = new Map();
 let knownMaxPage = 1;
 let isLoadingPage = false;
+let previewWindow = null;
+let selectedMessage = null;
 
 // 初始化
 document.addEventListener('DOMContentLoaded', async () => {
@@ -124,11 +126,50 @@ function bindEvents() {
     const uid = selected.dataset.uid;
     if (!confirm('确定删除这封邮件？')) return;
     try {
-      await window.secxAPI.mail.deleteMessage(currentAccountId, currentFolder, uid);
+      await window.secxAPI.mail.deleteMessage(currentAccountId, uid);
       await loadMessages();
       document.getElementById('mailContent').innerHTML = '';
     } catch (e) {
       alert('删除失败：' + e.message);
+    }
+  });
+
+  // 移动邮件
+  document.getElementById('btnMove').addEventListener('click', async () => {
+    const selected = document.querySelector('.mail-item.active');
+    if (!selected) { alert('请先选择邮件'); return; }
+    try {
+      const folders = await window.secxAPI.mail.listFolders(currentAccountId);
+      const select = document.getElementById('moveFolderSelect');
+      select.innerHTML = '';
+      folders.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.path;
+        opt.textContent = f.name;
+        select.appendChild(opt);
+      });
+      document.getElementById('moveModal').classList.remove('hidden');
+    } catch (e) {
+      alert('无法加载文件夹：' + e.message);
+    }
+  });
+
+  document.getElementById('btnCancelMove').addEventListener('click', () => {
+    document.getElementById('moveModal').classList.add('hidden');
+  });
+
+  document.getElementById('btnConfirmMove').addEventListener('click', async () => {
+    const selected = document.querySelector('.mail-item.active');
+    if (!selected) return;
+    const uid = selected.dataset.uid;
+    const dest = document.getElementById('moveFolderSelect').value;
+    try {
+      await window.secxAPI.mail.moveMessage(currentAccountId, uid, dest);
+      document.getElementById('moveModal').classList.add('hidden');
+      await loadMessages();
+      document.getElementById('mailContent').innerHTML = '';
+    } catch (e) {
+      alert('移动失败：' + e.message);
     }
   });
 
@@ -266,7 +307,7 @@ async function goToPage(pageNumber) {
     if (cachedMessages) {
       currentPage = pageNumber;
       currentMessages = cachedMessages;
-      await renderMessages(cachedMessages);
+      renderMessages(cachedMessages);
       renderPagination();
       return;
     }
@@ -288,11 +329,9 @@ async function goToPage(pageNumber) {
       knownMaxPage = Math.max(knownMaxPage, pageNumber);
     }
 
-    await renderMessages(messages);
+    renderMessages(messages);
   } catch (e) {
-    const tpl = await window.secxAPI.t('common.loadFailed');
-    const text = tpl && tpl !== 'common.loadFailed' ? tpl.replace('{{msg}}', e.message) : `加载失败：${e.message}`;
-    list.innerHTML = `<div style="padding:20px;color:#d13438;">${text}</div>`;
+    list.innerHTML = `<div style="padding:20px;color:#d13438;">加载失败：${e.message}</div>`;
   } finally {
     isLoadingPage = false;
     renderPagination();
@@ -323,7 +362,17 @@ async function renderMessages(messages) {
     div.addEventListener('click', () => {
       document.querySelectorAll('.mail-item').forEach(m => m.classList.remove('active'));
       div.classList.add('active');
+      selectedMessage = msg;
       loadMessageDetail(msg.uid);
+    });
+
+    div.addEventListener('dblclick', async () => {
+      const detail = await window.secxAPI.mail.getMessage(currentAccountId, msg.uid, currentFolder);
+      if (!detail) {
+        alert('无法获取邮件详情');
+        return;
+      }
+      window.secxAPI.openPreview(detail);
     });
     list.appendChild(div);
   });
@@ -381,46 +430,44 @@ function renderPagination() {
 }
 
 async function loadMessageDetail(uid) {
-  const msg = await window.secxAPI.mail.getMessage(currentAccountId, currentFolder, uid);
-  document.getElementById('mailSubject').textContent = msg.subject || '';
-  document.getElementById('mailFrom').textContent = msg.from || '';
-  document.getElementById('mailDate').textContent = msg.date || '';
-  
-  const contentEl = document.getElementById('mailContent');
-  const config = await window.secxAPI.getConfig();
+  try {
+    const msg = await window.secxAPI.mail.getMessage(currentAccountId, uid, currentFolder);
+    document.getElementById('mailSubject').textContent = msg.subject || '';
+    document.getElementById('mailFrom').textContent = msg.from || '';
+    document.getElementById('mailDate').textContent = msg.date || '';
+    
+    const contentEl = document.getElementById('mailContent');
+    const config = await window.secxAPI.getConfig();
 
-  // 附件列表
-  let attachmentsHtml = '';
-  if (msg.attachments && msg.attachments.length > 0) {
-    attachmentsHtml = '<div class="attachments"><strong>' + (await window.secxAPI.t('mail.attachments') || 'Attachments') + '：</strong><ul>';
-    msg.attachments.forEach((att, i) => {
-      attachmentsHtml += `<li>${att.filename} (${formatSize(att.size)})</li>`;
-    });
-    attachmentsHtml += '</ul></div>';
-  }
+    // 附件列表
+    let attachmentsHtml = '';
+    if (msg.attachments && msg.attachments.length > 0) {
+      attachmentsHtml = '<div class="attachments"><strong>附件：</strong><ul>';
+      msg.attachments.forEach(att => {
+        attachmentsHtml += `<li>${att.filename} (${formatSize(att.size)})</li>`;
+      });
+      attachmentsHtml += '</ul></div>';
+    }
 
-  // 沙箱 iframe
-  const iframe = document.createElement('iframe');
-  iframe.sandbox = config.security.allowMailJavaScript ? 'allow-same-origin' : '';
-  
-  if (!config.general.allowDevTools) {
-    iframe.addEventListener('contextmenu', e => e.preventDefault());
+    const iframe = document.createElement('iframe');
+    iframe.sandbox = config.security.allowMailJavaScript ? 'allow-same-origin' : '';
+    if (!config.general.allowDevTools) {
+      iframe.addEventListener('contextmenu', e => e.preventDefault());
+    }
+
+    const body = msg.html || msg.text || '<p>无内容</p>';
+    const doc = `<!DOCTYPE html><html><head><meta charset="UTF-8"><base target="_blank"><style>body{font-family:sans-serif;margin:0;padding:16px;word-wrap:break-word;} img{max-width:100%;}</style></head><body>${body}</body></html>`;
+    iframe.srcdoc = doc;
+    contentEl.innerHTML = attachmentsHtml;
+    contentEl.appendChild(iframe);
+  } catch (e) {
+    document.getElementById('mailContent').innerHTML = `<div style="padding:20px;color:#d13438;">无法预览邮件：${e.message}</div>`;
   }
-  
-  const doc = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <base target="_blank">
-      <style>body{font-family:sans-serif;margin:0;padding:16px;word-wrap:break-word;}</style>
-    </head>
-    <body>${msg.html || msg.text || ''}</body>
-    </html>
-  `;
-  iframe.srcdoc = doc;
-  contentEl.innerHTML = attachmentsHtml;
-  contentEl.appendChild(iframe);
+}
+
+function openPreviewWindow(message) {
+  if (!message) return;
+  window.openPreview(message);
 }
 
 function formatSize(bytes) {
