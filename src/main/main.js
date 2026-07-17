@@ -216,6 +216,20 @@ ipcMain.handle('security:decrypt', (_, data) => decrypt(data));
 ipcMain.handle('window:openSettings', () => openSettingsWindow());
 ipcMain.handle('window:openPreview', (_, message) => openPreviewWindow(message));
 ipcMain.handle('app:getVersion', () => app.getVersion());
+// 打开外部链接
+ipcMain.handle('open-external', async (_, url) => {
+  try {
+    await shell.openExternal(url);
+    return true;
+  } catch (e) {
+    return { error: e.message };
+  }
+});
+
+// 剪贴板操作
+const { clipboard } = require('electron');
+ipcMain.handle('clipboard:readText', () => clipboard.readText());
+ipcMain.handle('clipboard:writeText', (_, text) => clipboard.writeText(String(text || '')));
 
 // 注册 mailto 协议
 ipcMain.handle('mailto:register', () => {

@@ -10,6 +10,78 @@ let isLoadingPage = false;
 let previewWindow = null;
 let selectedMessage = null;
 
+// --- 自定义右键菜单实现 ---
+function createContextMenu() {
+  const menu = document.createElement('div');
+  menu.className = 'context-menu';
+  menu.style.display = 'none';
+  document.body.appendChild(menu);
+  document.addEventListener('click', () => { menu.style.display = 'none'; });
+  return menu;
+}
+
+const appContextMenu = createContextMenu();
+
+async function openExternalLink(url) {
+  if (!url) return;
+  await window.secxAPI.openExternal(url);
+}
+
+async function copyToClipboard(text) {
+  if (!text) return;
+  await window.secxAPI.clipboardWriteText(text);
+}
+
+async function pasteFromClipboardIntoActive() {
+  const txt = await window.secxAPI.clipboardReadText();
+  const el = document.activeElement;
+  if (!el) return;
+  if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+    const start = el.selectionStart || 0;
+    const end = el.selectionEnd || 0;
+    const v = el.value || '';
+    el.value = v.slice(0, start) + txt + v.slice(end);
+    el.selectionStart = el.selectionEnd = start + txt.length;
+    el.focus();
+  } else if (el.isContentEditable) {
+    document.execCommand('insertText', false, txt);
+  }
+}
+
+function showContextMenuAt(menu, x, y, items) {
+  menu.innerHTML = '';
+  items.forEach(it => {
+    const div = document.createElement('div');
+    div.className = 'item' + (it.disabled ? ' disabled' : '');
+    div.textContent = it.label;
+    if (!it.disabled) div.addEventListener('click', () => { it.click(); menu.style.display = 'none'; });
+    menu.appendChild(div);
+  });
+  menu.style.left = x + 'px';
+  menu.style.top = y + 'px';
+  menu.style.display = 'block';
+}
+
+document.addEventListener('contextmenu', async (e) => {
+  // ignore if inside modal context that has its own menu
+  const target = e.target;
+  const anchor = target.closest && target.closest('a');
+  const hasSelection = String(window.getSelection()).trim().length > 0;
+  const canPaste = true; // assume paste allowed, will check activeElement later
+  const items = [];
+  if (anchor && anchor.href) {
+    items.push({ label: '在浏览器中打开', click: () => openExternalLink(anchor.href) });
+    items.push({ label: '复制链接', click: () => copyToClipboard(anchor.href) });
+  }
+  items.push({ label: '复制', disabled: !hasSelection, click: async () => { const s = String(window.getSelection()); await copyToClipboard(s); } });
+  items.push({ label: '粘贴', disabled: false, click: pasteFromClipboardIntoActive });
+  items.push({ label: '全选', click: () => document.execCommand('selectAll') });
+
+  e.preventDefault();
+  showContextMenuAt(appContextMenu, e.clientX, e.clientY, items);
+});
+
+
 // 初始化
 document.addEventListener('DOMContentLoaded', async () => {
   const config = await window.secxAPI.getConfig();
@@ -460,6 +532,32 @@ async function loadMessageDetail(uid) {
     iframe.srcdoc = doc;
     contentEl.innerHTML = attachmentsHtml;
     contentEl.appendChild(iframe);
+    // 为 iframe 内部内容绑定右键菜单（仅在 srcdoc 同源时可用）
+    iframe.addEventListener('load', () => {
+      try {
+        const doc = iframe.contentDocument;
+        if (!doc) return;
+        doc.addEventListener('contextmenu', (ev) => {
+          ev.preventDefault();
+          const anchor = ev.target.closest ? ev.target.closest('a') : null;
+          const items = [];
+          if (anchor && anchor.href) {
+            items.push({ label: '在浏览器中打开', click: () => openExternalLink(anchor.href) });
+            items.push({ label: '复制链接', click: () => copyToClipboard(anchor.href) });
+          }
+          const hasSelection = String(doc.getSelection()).trim().length > 0;
+          items.push({ label: '复制', disabled: !hasSelection, click: async () => { const s = String(doc.getSelection()); await copyToClipboard(s); } });
+          items.push({ label: '全选', click: () => { const win = iframe.contentWindow; win.document.execCommand('selectAll'); } });
+          // 计算页面位置
+          const rect = iframe.getBoundingClientRect();
+          const x = rect.left + ev.clientX;
+          const y = rect.top + ev.clientY;
+          showContextMenuAt(appContextMenu, x, y, items);
+        });
+      } catch (e) {
+        // 可能跨域或不支持，忽略
+      }
+    });
   } catch (e) {
     document.getElementById('mailContent').innerHTML = `<div style="padding:20px;color:#d13438;">无法预览邮件：${e.message}</div>`;
   }

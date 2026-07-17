@@ -16,6 +16,9 @@ contextBridge.exposeInMainWorld('secxAPI', {
   openSettings: () => ipcRenderer.invoke('window:openSettings'),
   openPreview: (message) => ipcRenderer.invoke('window:openPreview', message),
   getAppVersion: () => ipcRenderer.invoke('app:getVersion'),
+  openExternal: (url) => ipcRenderer.invoke('open-external', url),
+  clipboardReadText: () => ipcRenderer.invoke('clipboard:readText'),
+  clipboardWriteText: (text) => ipcRenderer.invoke('clipboard:writeText', text),
 
   // MailTo
   registerMailto: () => ipcRenderer.invoke('mailto:register'),

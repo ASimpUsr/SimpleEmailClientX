@@ -47,6 +47,46 @@
         iframe.srcdoc = content;
         bodyEl.innerHTML = '';
         bodyEl.appendChild(iframe);
+        // 右键菜单：在浏览器打开、复制链接、复制选择、全选
+        const menu = document.createElement('div');
+        menu.className = 'context-menu';
+        menu.style.display = 'none';
+        document.body.appendChild(menu);
+
+        function showMenu(x, y, items) {
+          menu.innerHTML = '';
+          items.forEach(it => {
+            const d = document.createElement('div');
+            d.className = 'item' + (it.disabled ? ' disabled' : '');
+            d.textContent = it.label;
+            if (!it.disabled) d.addEventListener('click', () => { it.click(); menu.style.display = 'none'; });
+            menu.appendChild(d);
+          });
+          menu.style.left = x + 'px'; menu.style.top = y + 'px'; menu.style.display = 'block';
+        }
+
+        iframe.addEventListener('load', () => {
+          try {
+            const doc = iframe.contentDocument;
+            doc.addEventListener('contextmenu', async (ev) => {
+              ev.preventDefault();
+              const anchor = ev.target.closest ? ev.target.closest('a') : null;
+              const items = [];
+              if (anchor && anchor.href) {
+                items.push({ label: '在浏览器中打开', click: () => window.secxAPI.openExternal(anchor.href) });
+                items.push({ label: '复制链接', click: () => window.secxAPI.clipboardWriteText(anchor.href) });
+              }
+              const hasSel = String(doc.getSelection()).trim().length > 0;
+              items.push({ label: '复制', disabled: !hasSel, click: async () => { const s = String(doc.getSelection()); await window.secxAPI.clipboardWriteText(s); } });
+              items.push({ label: '全选', click: () => { iframe.contentWindow.document.execCommand('selectAll'); } });
+              const rect = iframe.getBoundingClientRect();
+              showMenu(rect.left + ev.clientX, rect.top + ev.clientY, items);
+            });
+          } catch (e) {
+            // ignore
+          }
+        });
+        document.addEventListener('click', () => { menu.style.display = 'none'; });
       });
     });
   </script>
